@@ -3,7 +3,7 @@
     <el-header>
       <div class="container head">
         <i class="el-icon-data-line"></i>
-        <span>Simulation System</span>
+        <span>Random Numbers</span>
       </div>
     </el-header>
     <el-main>

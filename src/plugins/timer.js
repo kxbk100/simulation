@@ -1,7 +1,6 @@
 /*
-    author: leeenx
-    @ timer 对象
-    @ 提供 7 个API如下：
+    @ timer Object
+    @ 7 APIs
     @ timer.setTimeout(fun, delay[, id])
     @ timer.clearTimeout(id)
     @ timer.setInterval(fun, delay[, id])

@@ -8,7 +8,7 @@ import {
   Card,
   Select,
   Option,
-  InputNumber,
+  Input,
   Form,
   Row,
   FormItem,
@@ -27,7 +27,7 @@ Vue.use(Icon);
 Vue.use(Card);
 Vue.use(Select);
 Vue.use(Option);
-Vue.use(InputNumber);
+Vue.use(Input);
 Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Row);
