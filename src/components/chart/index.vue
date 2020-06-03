@@ -121,7 +121,7 @@
 
             <el-form-item label="Number of random values">
               <el-input
-                v-model="formInline.random"
+                v-model="formInline.numberofrandoms"
                 size="small"
                 class="short"
               ></el-input>
@@ -232,7 +232,7 @@ export default {
       use: false,
       formInline: {
         minimum: 0,
-        random: 100,
+        numberofrandoms: 100,
         intervals: 20,
         rate: 200,
         T: 3.4756,
@@ -314,32 +314,48 @@ export default {
   },
 
   methods: {
-    calculate(range0, range1, type) {
-      let x = this.formInline.x0;
-      let count = this.formInline.count;
+    calculate(par1, par2, type) {
+      let count = +this.formInline.count;
       let index = 0;
+      let x = +this.formInline.x0;
+      let my = +this.formInline.my;
+      let sigma = +this.formInline.sigma;
+      let lambda = +this.formInline.lambda;
+
+      const n1 = +this.formInline.n1;
+      const xn = +this.formInline.xn;
+      const mod = +this.formInline.mod;
       const series = this.$refs.highchart.chart.series[0];
-      const random = this.formInline.random;
-      const rate = this.formInline.rate;
-      const intervals = this.formInline.intervals;
-      const maximum = this.formInline.maximum;
-      const n1 = this.formInline.n1;
-      const xn = this.formInline.xn;
-      const mod = this.formInline.mod;
-      const my = this.formInline.my;
-      const sigma = this.formInline.sigma;
-      const lambda = this.formInline.lambda;
+      const numberofrandoms = +this.formInline.numberofrandoms;
+      const rate = +this.formInline.rate;
+      const intervals = +this.formInline.intervals;
+      const minimum = +this.formInline.minimum;
+      const maximum = +this.formInline.maximum;
+
+      const gen_randomnumber = (mode) => {
+        let r = 0;
+        if (mode === true) {
+          x = (n1 * x + xn) % mod;
+          r = x;
+        } else {
+          r = Math.random();
+        }
+        return r;
+      };
 
       if (this.isFirst) {
-        this.arr.length = +maximum + 1;
-        this.arr.fill(0, 0, +maximum + 1);
+        this.arr.length = maximum + 1;
+        this.arr.fill(0, 0, maximum + 1);
+        console.log('============init arr===============');
+        console.log(this.arr);
+        console.log('============init arr===============');
         this.isFirst = !this.isFirst;
       }
 
       this.timeId = timer.setInterval(() => {
         // It's the same end condition as yours randomNumber
         // I just changed while into setInterval here
-        if (count >= random) {
+        if (count >= numberofrandoms) {
           this.isRun = false;
           timer.clearInterval(this.timeId);
           timer.reset(this.timeId);
@@ -348,42 +364,56 @@ export default {
         count++;
         this.isRun = true;
         for (let i = 0; i < rate; i++) {
-          let r = 0;
-          if (this.use === true) {
-            x = (n1 * x + xn) % mod;
-            r = x;
-          } else {
-            r = Math.random();
-          }
-
           if (type === 'normal') {
+            let z = 0;
+            let sumcount = 30;
+            for (let i = 1; i < sumcount; i++) {
+              z = z + gen_randomnumber(false);
+            }
+            my = par1;
+            sigma = par2;
             // following the formula: X mit N(μ, σ ^ 2) = μ + Z * σ ^ 2 in the lecture
-            index = parseInt((my + r * sigma * sigma) * intervals);
+            index = (my + z * sigma * sigma) * intervals;
           } else if (type === 'exponential') {
             // following the formula: f(y)= λe ^ (-λx) for x>0, or 0 in the lecture
+            lambda = par1;
             index = parseInt(
-              lambda * Math.pow(Math.E, -lambda * r) * intervals
+              lambda *
+                Math.pow(Math.E, -lambda * gen_randomnumber(false)) *
+                intervals
             );
+          } else if (type === 'sumOfUniformValues') {
+            let z = 0;
+            let sumcount = par1; // calculate n sums
+            for (let i = 1; i < sumcount; i++) {
+              z = z + gen_randomnumber(false);
+            }
+            my = par1;
+            sigma = par2; // par1 and par2 from form (formerly range.. see above!
+            index = parseInt((my + z * sigma * sigma) * intervals);
           } else {
             // following the pseudocode you gave me last time.
-            index = parseInt(r * intervals);
+            index = parseInt(gen_randomnumber(this.use) * intervals);
           }
 
-          if (index >= range0 && index <= range1) {
+          if (index >= 0 && index <= intervals) {
             this.arr[index]++;
           }
         }
-        series.setData(this.arr); // render
+        console.log('===========result arr============');
+        console.log(this.arr);
+        console.log('===========result arr============');
+        series.setData(this.arr.slice(+minimum, +maximum + 1)); // render
         console.log(count); // if I set random as 100, count will end with 100. You could check it in console
       }, 0);
     },
 
     onStart() {
-      const distribution = this.distribution;
-      const minimum = this.formInline.minimum;
-      const maximum = this.formInline.maximum;
-      const a = this.formInline.a;
-      const b = this.formInline.b;
+      const distribution = +this.distribution;
+      const minimum = +this.formInline.minimum;
+      const maximum = +this.formInline.maximum;
+      const a = +this.formInline.a;
+      const b = +this.formInline.b;
       switch (distribution) {
         case 0:
           this.calculate(0, 1, '');
@@ -392,7 +422,7 @@ export default {
           this.calculate(a, b, '');
           break;
         case 2:
-          this.calculate(minimum, maximum, '');
+          this.calculate(minimum, maximum, 'sumOfUniformValues');
           break;
         case 3:
           this.calculate(minimum, maximum, 'normal');
@@ -401,7 +431,7 @@ export default {
           this.calculate(minimum, maximum, 'exponential');
           break;
         default:
-          this.calculate(minimum, maximum);
+          this.calculate(minimum, maximum, '');
       }
     },
 
