@@ -329,8 +329,7 @@ export default {
       const numberofrandoms = +this.formInline.numberofrandoms;
       const rate = +this.formInline.rate;
       const intervals = +this.formInline.intervals;
-      const minimum = +this.formInline.minimum;
-      const maximum = +this.formInline.maximum;
+      // const maximum = +this.formInline.maximum;
 
       const gen_randomnumber = (mode) => {
         let r = 0;
@@ -344,17 +343,14 @@ export default {
       };
 
       if (this.isFirst) {
-        this.arr.length = maximum + 1;
-        this.arr.fill(0, 0, maximum + 1);
-        console.log('============init arr===============');
-        console.log(this.arr);
-        console.log('============init arr===============');
+        // this.arr.length = maximum + 1;
+        this.arr.length = intervals;
+        // this.arr.fill(0, 0, maximum + 1);
+        this.arr.fill(0, 0, intervals);
         this.isFirst = !this.isFirst;
       }
 
       this.timeId = timer.setInterval(() => {
-        // It's the same end condition as yours randomNumber
-        // I just changed while into setInterval here
         if (count >= numberofrandoms) {
           this.isRun = false;
           timer.clearInterval(this.timeId);
@@ -374,6 +370,7 @@ export default {
             sigma = par2;
             // following the formula: X mit N(μ, σ ^ 2) = μ + Z * σ ^ 2 in the lecture
             index = (my + z * sigma * sigma) * intervals;
+            console.log('normal', 'z: ' + z, 'index: ' + index);
           } else if (type === 'exponential') {
             // following the formula: f(y)= λe ^ (-λx) for x>0, or 0 in the lecture
             lambda = par1;
@@ -382,6 +379,7 @@ export default {
                 Math.pow(Math.E, -lambda * gen_randomnumber(false)) *
                 intervals
             );
+            console.log('exponential', 'index: ' + index);
           } else if (type === 'sumOfUniformValues') {
             let z = 0;
             let sumcount = par1; // calculate n sums
@@ -391,20 +389,17 @@ export default {
             my = par1;
             sigma = par2; // par1 and par2 from form (formerly range.. see above!
             index = parseInt((my + z * sigma * sigma) * intervals);
+            console.log('sumOfUniformValues', 'z: ' + z, 'index: ' + index);
           } else {
-            // following the pseudocode you gave me last time.
             index = parseInt(gen_randomnumber(this.use) * intervals);
+            console.log('others', 'index: ' + index);
           }
 
           if (index >= 0 && index <= intervals) {
             this.arr[index]++;
           }
         }
-        console.log('===========result arr============');
-        console.log(this.arr);
-        console.log('===========result arr============');
-        series.setData(this.arr.slice(+minimum, +maximum + 1)); // render
-        console.log(count); // if I set random as 100, count will end with 100. You could check it in console
+        series.setData(this.arr); // render
       }, 0);
     },
 
